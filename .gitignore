@@ -1,0 +1,5 @@
+build/
+dist/
+cairn-data/
+*.part
+*.log

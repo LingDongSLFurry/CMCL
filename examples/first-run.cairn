@@ -1,0 +1,8 @@
+# 在 Cairn 内执行 script run examples/first-run.cairn
+# 需要下载 Minecraft；不会自动启动图形游戏。
+account offline Player
+install 1.20.1 survival
+instance use survival
+config set memoryMiB 2048
+instance describe survival "原版生存"
+doctor survival

@@ -1,0 +1,152 @@
+package dev.cairn;
+
+import java.util.*;
+
+public final class Help {
+    private Help() {}
+    public static final Map<String,String> TOPICS=new LinkedHashMap<>();
+    static {
+        TOPICS.put("入门","""
+            dashboard / menu / page <instances|accounts|downloads|resources|tasks|settings|help>
+            setup                                  交互配置并安装首个游戏
+            help [主题] / commands / complete <前缀>
+            exit / quit                            退出终端，已启动的游戏继续运行
+            组合: command1 && command2 ; command3   && 只在前一条成功后继续
+            引号: instance describe demo "我的生存世界"
+            script run <文件>                      逐行执行指令，# 开头为注释
+            alias set <名字> "<指令>" / alias list / alias remove <名字>
+            history [数量] / clear
+            变量: ${selected} ${account} ${home}     脚本和别名也可使用
+            全局: --home <目录> --plain --json -c "<多条指令>" --script <文件>
+            """);
+        TOPICS.put("versions","""
+            versions list [筛选] [--type release|snapshot|old_beta|old_alpha] [--limit 30] [--offset 0] [--refresh]
+            versions installed / versions info <版本ID>
+            install <官方版本|latest|snapshot> [实例名] [--bg]
+            download <版本> [实例名] [--bg]          install 的别名
+            repair [实例名] [--bg]                  补全客户端、依赖库和资源
+            server download <版本> <输出.jar> [--bg]
+            loader list <fabric|quilt|forge|neoforge|liteloader|optifine> <MC版本>
+            loader install <类型> <MC版本> <加载器版本|latest> <实例名> [--bg]
+            loader local <forge|neoforge|optifine> <官方安装器.jar> <MC版本> <实例名> [--bg]
+            OptiFine 自动安装同样可用 loader install optifine <MC> latest <实例名>
+            原版 MC、资源和 Java 默认用 Mojang 官方源；source 可配置自定义源，加载器使用各自上游。
+            """);
+        TOPICS.put("instance","""
+            instance list [--all] / instance use <名称> / instance info [名称]
+            instance create <名称> <已安装版本ID> [--loader vanilla]
+            instance clone <源> <新名称> [--saves] / instance rename <源> <新名称>
+            instance describe <名称> "<描述>" / instance star <名称>
+            instance hide <名称> / instance show <名称>
+            instance set <名称> <键> <值> / instance reset <名称> <键>
+            instance remove <名称>                 移到回收区；原版共享下载保留
+            instance paths [名称]                  输出实例、存档、Mod、截图路径
+            root add <名称> "<外部.minecraft路径>" / root list / root versions <名称>
+            root adopt <根目录名称> <版本ID> <新实例名> [--bg]
+            trash list / trash restore <回收项名称>
+            """);
+        TOPICS.put("account","""
+            account list / account use <ID或名称> / account remove <ID或名称>
+            account offline <玩家名>               离线 UUID；正版服务器需正版账户
+            account microsoft                      设备代码登录，不自动打开浏览器
+            account refresh [ID或名称]
+            account auth <Yggdrasil根URL> <用户名> [角色ID]  密码从终端隐藏输入
+            account nide <服务器ID> <用户名> [角色ID]      统一通行证协议适配
+            skin download <玩家名|self> <输出.png>
+            skin set-url <classic|slim> <HTTPS皮肤URL> / skin reset
+            skin upload <classic|slim> <本地PNG文件>
+            skin offline <PNG文件> [实例名]         本地资源包替换，仅本机可见
+            微软登录须配置获准使用 Minecraft API 的自有应用:
+            config set msClientId <应用ID>         或环境变量 CAIRN_MS_CLIENT_ID
+            第三方账户: config set authlibInjector "<注入器.jar>"
+            """);
+        TOPICS.put("play","""
+            play [实例名] [--wait] [--dry-run] [--server host:port] [--no-repair] [--no-java-download]
+            launch ...                             play 的别名
+            sessions                               查看 PID、运行与退出状态
+            stop [实例名|会话ID|all] [--force]
+            logs [实例名|会话ID] [--lines 80] [--follow]
+            crash [实例名] [--file <日志文件>]
+            doctor [实例名] [--deep]                环境、Java、文件与重复 Mod 检查
+            report <实例名> <输出.zip>              导出脱敏诊断报告
+            launch-script <实例名> <输出.cmd或.sh>  导出不含令牌的启动脚本
+            内存、窗口、GC、JVM/游戏参数及前后置命令可全局或按实例设置。
+            """);
+        TOPICS.put("content","""
+            content search "<关键词>" [--type mod|modpack|shader|resourcepack|datapack] [--game <MC>] [--loader <类型>] [--source modrinth|curseforge] [--limit 20] [--offset 0]
+            content info <项目ID> [--source ...]
+            content versions <项目ID> [--game <MC>] [--loader ...] [--source ...]
+            content install <项目ID> [--version <ID>] [--instance <实例>] [--type mod] [--world <世界名>] [--source ...] [--bg]
+            content update [实例名] [--apply] [--bg] 默认只列出更新
+            content import <mod|shader|resourcepack|datapack> <本地文件> [--instance ...] [--world ...]
+            content remove <类型> <文件名> [--instance ...] [--world ...]
+            mod list [实例名] / mod enable <文件.jar.disabled> [--instance ...]
+            mod disable <文件.jar> [--instance ...] / mod check [实例名]
+            CurseForge 需自己的密钥: config set curseforgeKey（隐藏输入）
+            """);
+        TOPICS.put("pack","""
+            pack import <整合包.zip或.mrpack> <实例名> [--optional] [--bg]
+            pack export <实例名> <输出.zip> [--saves] [--bg]
+            pack fetch <项目ID> <实例名> [--version <ID>] [--source modrinth|curseforge] [--optional] [--bg]
+            导入: Modrinth、CurseForge、MultiMC/Prism、MCBBS、HMCL、Cairn 与标准游戏目录压缩包。
+            导出: Cairn 包含配置、Mod、加载器文件；导入时原版客户端从 Mojang 获取。
+            """);
+        TOPICS.put("java","""
+            java scan / java add "<java.exe或JDK目录>" / java use <auto|路径>
+            java available [--refresh]              Mojang 当前平台运行时列表
+            java install <8|16|17|21|25|其他官方版本> [--bg]
+            java for <实例名>                      查看所需 Java
+            config set memoryMiB 4096
+            instance set demo java "D:\\Java\\jdk21\\bin\\java.exe"
+            memory                                 查看物理内存与启动器堆
+            """);
+        TOPICS.put("tasks","""
+            tasks / task list / task wait [ID|all] / task cancel <ID>
+            耗时命令加 --bg 后可在交互终端继续输入、查看或取消任务。
+            单次命令模式会等待任务结束；exit 前会等待仍在执行的任务。
+            source list / help source               下载源管理与自定义地址
+            cache info / cache clean               缓存移到回收区
+            config list / config get <键> / config set <键> <值>
+            config reset <键> / config export <文件> / config import <文件>
+            数组用 JSON，外层单引号: config set jvmArgs '["-Dexample=true"]'
+            主要键: memoryMiB minMemoryMiB width height fullscreen isolation gc java
+            jvmArgs gameArgs before after threads retries speedKiB color ascii proxy
+            before/after 为单个进程的 argv 数组，不通过系统 shell 执行。
+            proxy 改动需重启生效；speedKiB=0 不限速，否则总下载按限速串行进行。
+            """);
+        TOPICS.put("source","""
+            source list / source show [名称]        显示默认官方源与自定义源
+            source add <名称> <基础URL> [覆盖选项]  添加兼容 Mojang 路径的镜像
+            source edit <名称> [基础URL] [覆盖选项] 修改地址；给出基础URL会重建默认映射
+            source check [名称]                    检查版本清单、描述和描述哈希，不改变当前源
+            source use <official|自定义名称>       切换后即时生效，元数据缓存按源隔离
+            source remove <名称>                   删除当前源时自动恢复 official
+            覆盖选项: --manifest <完整清单URL> --metadata <元数据基础URL>
+            --client <客户端基础URL> --libraries <库基础URL> --assets <资源基础URL>
+            --java-index <完整Java索引URL> --java-metadata <Java描述基础URL>
+            --java-files <Java文件基础URL>
+            基础URL按原 Mojang URL 的路径追加，例如 /v1/objects/... 或 /ab/hash。
+            默认要求 HTTPS；局域网 HTTP 源需显式 --allow-http。
+            下载任务运行时不能修改源；已有文件继续按哈希复用，登录请求独立。
+            示例: source add myMirror https://mirror.example.org
+                  source check myMirror && source use myMirror
+                  source edit myMirror --assets https://cdn.example.org/assets
+                  source use official
+            """);
+        TOPICS.put("link","""
+            server ping <host[:port]> / lan [--seconds 3]
+            config set easyTier "<easytier-core.exe路径>"
+            link host <房间名> <自定义节点URL> [--port 25565]
+            link join <房间名> <自定义节点URL> [--port 25565]
+            link status / link log / link stop      房间密码通过隐藏输入获取
+            双方须使用相同房间、密码与节点；加入方在 MC 连接 localhost:端口。
+            房主在 MC 开放局域网，并将 --port 设为游戏显示的端口。
+            music play <WAV/AIFF/AU文件> [--volume 0.5] / music stop
+            about / features / news [--refresh]     项目说明、覆盖边界与最新版本
+            """);
+    }
+    public static final String[] COMMANDS={"dashboard","menu","page","setup","help","commands","complete","versions","install","download","repair","instance","root","account","skin",
+            "loader","play","launch","sessions","stop","logs","crash","doctor","report","launch-script","content","mod","pack","java","memory","tasks","task",
+            "source","config","cache","trash","server","lan","link","music","alias","script","history","clear","about","features","news","exit","quit","selftest"};
+    public static String all() { StringBuilder b=new StringBuilder(); TOPICS.forEach((k,v) -> b.append("[").append(k).append("]\n").append(v).append('\n')); return b.toString(); }
+}

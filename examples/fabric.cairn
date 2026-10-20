@@ -1,0 +1,7 @@
+# 在 Cairn 内执行 script run examples/fabric.cairn
+# 如实例名 fabricGame 已存在，请先修改脚本中的名称。
+account offline Player
+loader install fabric 1.20.1 0.16.14 fabricGame
+content install sodium --instance fabricGame
+instance use fabricGame
+doctor fabricGame --deep
