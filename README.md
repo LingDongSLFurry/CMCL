@@ -2,11 +2,11 @@
 
 独立实现的 Minecraft Java 启动器，以字符工作区和命令输入为核心。没有标准图形启动页面，不仿制 PCL 界面。原版游戏、资源和 Java 默认使用 Mojang 官方源，也可通过指令配置、检查和切换自定义下载源。
 
-本项目目前为 **0.1.0 预发布**。已经实现和验证主要下载、实例、加载器、Mod 与进程管理链路，但**尚未达到与 PCL 所有功能、兼容特例和专属服务完全等价**。完整边界见[功能与实现对照](docs/PCL功能与实现对照.md)，已实测项目见[验证报告](docs/验证报告.md)。
+本项目目前为 **0.1.1 预发布**。已经实现和验证主要下载、实例、加载器、Mod 与进程管理链路，但**尚未达到与 PCL 所有功能、兼容特例和专属服务完全等价**。完整边界见[功能与实现对照](docs/PCL功能与实现对照.md)，已实测项目见[验证报告](docs/验证报告.md)。
 
 ## 下载和运行
 
-[发行版与附件](https://github.com/LingDongSLFurry/CMCL/releases/tag/cairn-v0.1.0)
+[发行版与附件](https://github.com/LingDongSLFurry/CMCL/releases/tag/cairn-v0.1.1)
 
 启动器需要 Java 17 或更新版本。下载 `cairn.jar`：
 
@@ -26,6 +26,8 @@ play
 ```
 
 游戏本身正常显示 Minecraft 窗口；启动器只显示终端内容。
+
+0.1.1 修复了 Windows 代码页 936 下的乱码。直接运行 JAR 会匹配控制台编码，重定向输出默认 UTF-8；`Start.cmd` / `Start.ps1` 使用 UTF-8 和兼容边框，避免旧 CMD 显示颜色控制码。可用 `--encoding UTF-8` 或 `--encoding GBK` 显式指定输出编码。
 
 ## 功能
 

@@ -39,7 +39,8 @@ public final class Diagnostics {
     public Diagnostics(Store store,Minecraft mc,JavaRuntime java,Content content,Ui ui) { this.store=store; this.mc=mc; this.java=java; this.content=content; this.ui=ui; }
     public Map<String,Object> doctor(String name,boolean deep) throws Exception {
         Map<String,Object> report=Json.map("launcher",Main.VERSION,"os",System.getProperty("os.name"),"arch",Util.ARCH,"home",store.home.toString(),
-                "diskFree",Files.getFileStore(store.home).getUsableSpace(),"source",store.text("source"));
+                "diskFree",Files.getFileStore(store.home).getUsableSpace(),"source",store.text("source"),
+                "terminalEncoding",Terminal.charset().name(),"ansiCapable",Terminal.supportsAnsi());
         List<Object> checks=new ArrayList<>(); report.put("checks",checks);
         checks.add(Json.map("item","Java 列表","status","INFO","value",java.scan().stream().map(JavaRuntime.Info::json).toList()));
         if (name == null || name.isBlank()) name=store.text("selected");

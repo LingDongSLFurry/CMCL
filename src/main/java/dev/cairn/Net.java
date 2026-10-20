@@ -52,7 +52,7 @@ public final class Net {
         return u;
     }
     private HttpRequest.Builder builder(URI uri) {
-        return HttpRequest.newBuilder(uri).timeout(Duration.ofMinutes(3)).header("User-Agent","CairnLauncher/0.1.0 (independent Java terminal launcher)").header("Accept-Encoding","identity");
+        return HttpRequest.newBuilder(uri).timeout(Duration.ofMinutes(3)).header("User-Agent","CairnLauncher/"+Main.VERSION+" (independent Java terminal launcher)").header("Accept-Encoding","identity");
     }
     private HttpResponse<InputStream> getStream(String url,Policy policy,Map<String,String> headers) throws Exception {
         return getStream(url,policy,headers,Sources.Kind.AUTO,Sources.active(store.config()));

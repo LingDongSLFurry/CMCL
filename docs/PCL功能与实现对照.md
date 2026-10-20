@@ -119,7 +119,7 @@ Cairn 以公开的 Minecraft/上游协议独立编写 Java 实现，不是 PCL �
 
 | Java 类 | 责任 |
 | --- | --- |
-| `Main`、`Shell`、`Help`、`Ui` | 命令参数、字符工作区、脚本、别名、帮助和输出 |
+| `Main`、`Shell`、`Help`、`Ui`、`Terminal` | 命令参数、字符工作区、脚本、别名、帮助、控制台编码和输出 |
 | `Store`、`Util`、`Json` | 配置、凭据、锁、路径、ZIP、原子写入和 JSON |
 | `Net`、`Jobs` | HTTPS、来源限制、续传、哈希、并发、取消和限速 |
 | `Sources` | 自定义下载源、分类 URL 映射、当前源校验与缓存指纹 |

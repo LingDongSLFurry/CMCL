@@ -6,13 +6,12 @@ import java.nio.file.*;
 import java.util.*;
 
 public final class Main {
-    public static final String VERSION="0.1.0";
+    public static final String VERSION="0.1.1";
     public static void main(String[] args) {
         System.setProperty("java.awt.headless","true");
-        System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out),true,StandardCharsets.UTF_8));
-        System.setErr(new PrintStream(new FileOutputStream(FileDescriptor.err),true,StandardCharsets.UTF_8));
         int result=0;
         try {
+            Terminal.configure(System.getProperty("cairn.console.encoding","auto"));
             List<String> a=new ArrayList<>(Arrays.asList(args)); Path home=null; String command=null,script=null;
             boolean plain=false,json=false;
             while (!a.isEmpty() && a.get(0).startsWith("-")) {
@@ -21,10 +20,11 @@ public final class Main {
                     case "--home" -> { Util.require(!a.isEmpty(),"--home 缺少路径"); home=Path.of(a.remove(0)); }
                     case "--plain" -> plain=true;
                     case "--json" -> json=true;
+                    case "--encoding" -> { Util.require(!a.isEmpty(),"--encoding 缺少 auto/UTF-8/GBK 等编码名"); Terminal.configure(a.remove(0)); }
                     case "-c","--command" -> { Util.require(!a.isEmpty(),"-c 缺少指令"); command=a.remove(0); }
                     case "--script" -> { Util.require(!a.isEmpty(),"--script 缺少路径"); script=a.remove(0); }
                     case "--version","-v" -> { System.out.println("Cairn "+VERSION+" / Java 17+ / terminal only"); return; }
-                    case "--help","-h" -> { System.out.println("java -jar cairn.jar [--home <数据目录>] [--plain] [--json] [指令]\n"+Help.all()); return; }
+                    case "--help","-h" -> { System.out.println("java -jar cairn.jar [--home <数据目录>] [--plain] [--json] [--encoding auto|UTF-8|GBK] [指令]\n"+Help.all()); return; }
                     case "--self-test" -> { SelfTest.run(); return; }
                     default -> throw new IllegalArgumentException("未知全局参数: "+flag);
                 }

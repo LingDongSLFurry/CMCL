@@ -2,6 +2,7 @@ package dev.cairn;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.net.*;
 import java.net.http.*;
@@ -28,7 +29,7 @@ public final class SelfTest {
         Path work=Path.of(System.getProperty("cairn.testRoot",System.getProperty("java.io.tmpdir"))).resolve("cairn-selftest-"+UUID.randomUUID());
         Files.createDirectories(work);
         try {
-            codec(); parser(); paths(work); rules();
+            codec(); parser(); paths(work); rules(); terminal(work);
             integration(work);
             System.out.println("PASS: "+checks+" assertions; JSON, parsing, path/ZIP defenses, official/custom sources, vault, inheritance, native/legacy assets, launch worker, redaction, instance/mod/pack lifecycle.");
             System.out.println("Fixture directory (contains no user credentials): "+work);
@@ -97,6 +98,34 @@ public final class SelfTest {
         for (int v : new int[]{0,1,127,128,255,65535,Integer.MAX_VALUE,-1}) Multiplayer.writeVarInt(out,v);
         DataInputStream in=new DataInputStream(new ByteArrayInputStream(bytes.toByteArray()));
         for (int v : new int[]{0,1,127,128,255,65535,Integer.MAX_VALUE,-1}) ok(Multiplayer.readVarInt(in) == v,"VarInt "+v);
+    }
+    private static void terminal(Path work) throws Exception {
+        Charset gbk=Charset.forName("GBK");
+        ok(Terminal.choose("auto",gbk).equals(gbk),"console auto encoding follows GBK code page");
+        ok(Terminal.choose("auto",null).equals(StandardCharsets.UTF_8),"redirected output defaults to UTF-8");
+        ok(Terminal.choose("UTF-8",gbk).equals(StandardCharsets.UTF_8),"explicit output encoding");
+        rejects(() -> Terminal.choose("invalid-cairn-charset",gbk),"invalid terminal encoding");
+        ok(!Terminal.supportsAnsi(Map.of("TERM","dumb"),true),"dumb terminal has no ANSI auto mode");
+        ok(!Terminal.supportsAnsi(Map.of(),true),"classic Windows console avoids ANSI auto mode");
+        ok(Terminal.supportsAnsi(Map.of("WT_SESSION","fixture"),true),"Windows Terminal supports ANSI auto mode");
+        for (Charset encoding : List.of(gbk,StandardCharsets.UTF_8)) {
+            Path home=work.resolve("terminal-"+encoding.name()); String banner="中文编码验证";
+            String executable=Path.of(System.getProperty("java.home"),"bin",Util.WINDOWS ? "java.exe" : "java").toString();
+            ProcessBuilder builder=new ProcessBuilder(executable,"-Dcairn.console.encoding="+encoding.name(),"-cp",Launch.self().toString(),
+                    "dev.cairn.Main","--home",home.toString(),"--plain").redirectErrorStream(true);
+            builder.environment().put("TERM","dumb");
+            Process process=builder.start();
+            FutureTask<byte[]> capture=new FutureTask<>(() -> process.getInputStream().readNBytes(512*1024));
+            Thread drain=new Thread(capture,"terminal-output-fixture"); drain.setDaemon(true); drain.start();
+            try (OutputStream input=process.getOutputStream()) {
+                input.write(("config set banner \""+banner+"\"\ndashboard\nexit\n").getBytes(encoding));
+            }
+            if (!process.waitFor(15,TimeUnit.SECONDS)) { process.destroyForcibly(); throw new IOException("Terminal fixture timed out"); }
+            String text=encoding.newDecoder().decode(java.nio.ByteBuffer.wrap(capture.get(3,TimeUnit.SECONDS))).toString();
+            ok(process.exitValue() == 0 && text.contains("石栈") && text.contains(banner),"real "+encoding.name()+" terminal byte stream");
+            ok(!text.contains("\u001b["),"plain "+encoding.name()+" output has no ANSI sequences");
+            ok(Json.str(Json.obj(Json.read(home.resolve("config.json"))),"banner","").equals(banner),"Chinese "+encoding.name()+" input persists as UTF-8 JSON");
+        }
     }
     private static void integration(Path work) throws Exception {
         Path home=work.resolve("data with spaces");

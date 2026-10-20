@@ -17,7 +17,8 @@ public final class Help {
             alias set <名字> "<指令>" / alias list / alias remove <名字>
             history [数量] / clear
             变量: ${selected} ${account} ${home}     脚本和别名也可使用
-            全局: --home <目录> --plain --json -c "<多条指令>" --script <文件>
+            全局: --home <目录> --plain --json --encoding auto|UTF-8|GBK -c "<多条指令>" --script <文件>
+            控制台自动匹配代码页，管道默认 UTF-8；一键脚本使用 UTF-8 与兼容边框。
             """);
         TOPICS.put("versions","""
             versions list [筛选] [--type release|snapshot|old_beta|old_alpha] [--limit 30] [--offset 0] [--refresh]

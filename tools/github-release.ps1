@@ -5,10 +5,11 @@ param(
     [Parameter(Mandatory=$true)][string]$BodyFile,
     [Parameter(Mandatory=$true)][string[]]$AssetPaths,
     [Parameter(Mandatory=$true)][string]$Receipt,
-    [Parameter(Mandatory=$true)][string]$VerificationDirectory
+    [Parameter(Mandatory=$true)][string]$VerificationDirectory,
+    [string]$Version='0.1.1'
 )
 $ErrorActionPreference='Stop'
-if ($Repository -notmatch '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$' -or $Commit -notmatch '^[0-9a-f]{40}$' -or $Tag -notmatch '^[A-Za-z0-9_.-]+$') { throw 'Invalid repository, commit or tag.' }
+if ($Repository -notmatch '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$' -or $Commit -notmatch '^[0-9a-f]{40}$' -or $Tag -notmatch '^[A-Za-z0-9_.-]+$' -or $Version -notmatch '^\d+\.\d+\.\d+$') { throw 'Invalid repository, commit, tag or version.' }
 $owner=$Repository.Split('/')[0]
 $env:GIT_TERMINAL_PROMPT='0'
 $env:GCM_INTERACTIVE='Never'
@@ -19,7 +20,7 @@ if (-not $passwordLine) { throw 'The cached credential does not contain a token.
 $releaseToken=$passwordLine.Substring(9)
 $credentialLines=$null
 $passwordLine=$null
-$headers=@{Authorization="Bearer $releaseToken";Accept='application/vnd.github+json';'X-GitHub-Api-Version'='2022-11-28';'User-Agent'='CairnReleaseTool/0.1.0'}
+$headers=@{Authorization="Bearer $releaseToken";Accept='application/vnd.github+json';'X-GitHub-Api-Version'='2022-11-28';'User-Agent'="CairnReleaseTool/$Version"}
 $api="https://api.github.com/repos/$Repository"
 try {
     $repo=Invoke-RestMethod "$api" -Headers $headers -TimeoutSec 30
@@ -39,7 +40,7 @@ try {
     catch { if ([int]$_.Exception.Response.StatusCode -ne 404) { throw } }
     if ($release -and $release.target_commitish -ne $Commit) { throw 'An existing release uses this tag for another source revision.' }
     if (-not $release) {
-        $body=@{tag_name=$Tag;target_commitish=$Commit;name='Cairn / 石栈 0.1.0 — Java 终端启动器';body=(Get-Content -LiteralPath $BodyFile -Raw -Encoding UTF8);draft=$true;prerelease=$true;make_latest='false'} | ConvertTo-Json -Depth 6
+        $body=@{tag_name=$Tag;target_commitish=$Commit;name="Cairn / 石栈 $Version — Java 终端启动器";body=(Get-Content -LiteralPath $BodyFile -Raw -Encoding UTF8);draft=$true;prerelease=$true;make_latest='false'} | ConvertTo-Json -Depth 6
         $release=Invoke-RestMethod "$api/releases" -Method Post -Headers $headers -ContentType 'application/json; charset=utf-8' -Body ([Text.Encoding]::UTF8.GetBytes($body)) -TimeoutSec 30
     }
     $uploaded=@()
