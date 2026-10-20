@@ -62,6 +62,13 @@ try {
     if ($release.draft) {
         $release=Invoke-RestMethod "$api/releases/$($release.id)" -Method Patch -Headers $headers -ContentType 'application/json' -Body '{"draft":false,"prerelease":true,"make_latest":"false"}' -TimeoutSec 30
     }
+    # Draft upload URLs use a temporary untagged name. Refresh them after publishing.
+    $published=Invoke-RestMethod "$api/releases/tags/$Tag" -Headers $headers -TimeoutSec 30
+    foreach($asset in $uploaded) {
+        $fresh=@($published.assets | Where-Object name -EQ $asset.name)
+        if ($fresh.Count -ne 1 -or $fresh[0].size -ne $asset.bytes) { throw "Published asset metadata mismatch: $($asset.name)" }
+        $asset['url']=$fresh[0].browser_download_url
+    }
     New-Item -ItemType Directory -Force -Path $VerificationDirectory | Out-Null
     foreach($asset in $uploaded) {
         $download=Join-Path $VerificationDirectory $asset.name
@@ -74,7 +81,7 @@ try {
             } catch { if ($attempt -ge 2) { throw }; Start-Sleep -Seconds (2*($attempt+1)) }
         }
         if (-not $downloaded -or (Get-Item -LiteralPath $download).Length -ne $asset.bytes -or (Get-FileHash -LiteralPath $download -Algorithm SHA256).Hash.ToLowerInvariant() -ne $asset.sha256) { throw "Public download verification failed: $($asset.name)" }
-        $asset.verified=$true
+        $asset['verified']=$true
         Write-Output "Public download SHA-256 verified: $($asset.name)"
     }
     $published=Invoke-RestMethod "$api/releases/tags/$Tag" -Headers $headers -TimeoutSec 30
